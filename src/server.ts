@@ -13,9 +13,21 @@ const initDatabase = () => {
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
-      // TODO: Provide the columns
+    // TODO: Provide the columns
+      user_id Integer Primary key,
+      user_name text not null,
+      user_age integer not null
+      is_admin boolean not null
+      createdat text not null
+      updateat text not null
     )
   `);
+        /*User_Id Int primary key;
+        User_name varchar(255);
+        User_age Int;
+        isAdmin boolean;
+        createdAt Varchar(255);
+        updatedAt Varchar(255);*/  //turns out the sqlite ddl is diffrent.. and idk if its case sensitive tho
 
   // TODO: Create indexes for better performance
 };
@@ -35,6 +47,21 @@ export const createMyServer = (): http.Server => {
 
   const server = http.createServer((req, res) => {
     // TODO: Implement the service.
+    const parsedUrl = url.parse(req.url!, true);
+    const path = parsedUrl.pathname;
+    const method = req.method;
+    if (method === "GET" && path === "/items") {
+    // list
+    }
+    if (method === "GET" && path?.startsWith("/items/")) {
+    // get one
+    }
+    if (method === "POST" && path === "/items") {
+    // create
+    }
+    // ... PUT, DELETE
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Not found" }));
   });
 
   return server;
