@@ -13,23 +13,15 @@ const initDatabase = () => {
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
-    // TODO: Provide the columns
-      user_id Integer Primary key,
-      user_name text not null,
-      user_age integer not null
-      is_admin boolean not null
-      createdat text not null
-      updateat text not null
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      age INTEGER NOT NULL,
+      isAdmin BOOLEAN NOT NULL,
+      createdAt TEXT NOT NULL,
+      updatedAt TEXT NOT NULL
     )
   `);
-        /*User_Id Int primary key;
-        User_name varchar(255);
-        User_age Int;
-        isAdmin boolean;
-        createdAt Varchar(255);
-        updatedAt Varchar(255);*/  //turns out the sqlite ddl is diffrent.. and idk if its case sensitive tho
 
-  // TODO: Create indexes for better performance
 };
 
 type User = {
@@ -44,20 +36,53 @@ type User = {
 export const createMyServer = (): http.Server => {
   // Initialize database when server is created
   initDatabase();
-
+let items: User[] = [];
+let nextId = 1;
   const server = http.createServer((req, res) => {
     // TODO: Implement the service.
     const parsedUrl = url.parse(req.url!, true);
     const path = parsedUrl.pathname;
     const method = req.method;
     if (method === "GET" && path === "/items") {
-    // list
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(items));
+      return;
     }
     if (method === "GET" && path?.startsWith("/items/")) {
-    // get one
+      const id = parseInt(path.split("/")[2]);
+      if (isNaN(id)) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid item ID" }));
+      return;
+      }
+      const item = items.find((item) => item.id === id);
+      if (item) {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(item));
+      } else {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Item not found" }));
+      }
     }
     if (method === "POST" && path === "/items") {
-    // create
+      let body = "";
+      req.on("data", (chunk) => {
+      body += chunk.toString();
+      });
+      req.on("end", () => {
+      try {
+      const data = body ? JSON.parse(body) : undefined;
+      // validate ...
+      const newItem = { id: nextId++, ...data };
+      items.push(newItem);
+      res.writeHead(201, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(newItem));
+      } catch (error) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid JSON" }));
+      }
+      });
+      return;
     }
     // ... PUT, DELETE
     res.writeHead(404, { "Content-Type": "application/json" });
