@@ -85,6 +85,18 @@ let nextId = 1;
       return;
     }
     // ... PUT, DELETE
+    const itemIndex = items.findIndex((item) => item.id === id);
+    if (itemIndex === -1) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Item not found" }));
+      return;
+      }
+      // ... read body, validate ...
+    items[itemIndex] = { id, name: data.name.trim(), description: data.description.trim() };
+    // DELETE /items/:id
+    const deletedItem = items.splice(itemIndex, 1)[0];
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ message: "Item deleted", item: deletedItem }));
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Not found" }));
   });
