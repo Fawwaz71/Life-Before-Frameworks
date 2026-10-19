@@ -12,19 +12,6 @@ const initDatabase = () => {
   if (!db) {
     db = new Database(dbPath);
 
-<<<<<<< HEAD
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      age INTEGER NOT NULL,
-      isAdmin BOOLEAN NOT NULL,
-      createdAt TEXT NOT NULL,
-      updatedAt TEXT NOT NULL
-    )
-  `);
-
-=======
     db.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,12 +21,11 @@ const initDatabase = () => {
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL
       )
-    `);// make the table using sql
+    `); // make the table using sql
 
     db.exec(`CREATE INDEX IF NOT EXISTS idx_users_name ON users (name)`);
-    db.exec(`CREATE INDEX IF NOT EXISTS idx_users_isAdmin ON users (isAdmin)`);// make index
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_users_isAdmin ON users (isAdmin)`); // make index
   }
->>>>>>> 0c1cbd1 (final)
 };
 
 type User = {
@@ -57,7 +43,7 @@ const sendJson = (res: http.ServerResponse, status: number, data: unknown) => {
   res.end(JSON.stringify(data));
 }; // send json respone with status
 
-const rowToUser = (row: any): User => { // 
+const rowToUser = (row: any): User => {
   return {
     id: row.id,
     name: row.name,
@@ -74,7 +60,7 @@ const parseId = (text: string): number | null => {
     return null;
   }
   return id;
-};//basicaly change string to number so it can be process and remove string or float 
+}; //basicaly change string to number so it can be process and remove string or float 
 
 const validateUser = (data: any): string | null => {
   if (!data || typeof data !== "object" || Array.isArray(data) || Object.keys(data).length === 0) {
@@ -82,16 +68,16 @@ const validateUser = (data: any): string | null => {
   } // make sure it is not empty
   if (typeof data.name !== "string" || data.name.trim() === "") {
     return "Name is required and must be a non-empty string";
-  }// make sure name is string and not empty
+  } // make sure name is string and not empty
   if (data.name.trim().length > 100) {
     return "Name must be 100 characters or less";
   } // make sure the lenght is less than 100 character 
   if (data.age === undefined) {
     return "Age is required";
-  }// make sure its not null
+  } // make sure its not null
   if (typeof data.age !== "number" || !Number.isInteger(data.age) || data.age < 0 || data.age > 150) {
     return "Age must be a valid integer between 0 and 150";
-  }//if not number or not integer and not beyond 150 and not even born yet to be inputed basicaly filter so it doesnt have weird number of age
+  } //if not number or not integer and not beyond 150 and not even born yet to be inputed basicaly filter so it doesnt have weird number of age
   if (data.isAdmin !== undefined && typeof data.isAdmin !== "boolean") {
     return "isAdmin must be a boolean value";
   } // make sure the value is boolean for validation
@@ -126,76 +112,13 @@ const readBody = (
 export const createMyServer = (): http.Server => {
   // Initialize database when server is created
   initDatabase();
-<<<<<<< HEAD
-let items: User[] = [];
-let nextId = 1;
-  const server = http.createServer((req, res) => {
-    // TODO: Implement the service.
-    const parsedUrl = url.parse(req.url!, true);
-    const path = parsedUrl.pathname;
-    const method = req.method;
-    if (method === "GET" && path === "/items") {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(items));
-      return;
-    }
-    if (method === "GET" && path?.startsWith("/items/")) {
-      const id = parseInt(path.split("/")[2]);
-      if (isNaN(id)) {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Invalid item ID" }));
-      return;
-      }
-      const item = items.find((item) => item.id === id);
-      if (item) {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(item));
-      } else {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Item not found" }));
-      }
-    }
-    if (method === "POST" && path === "/items") {
-      let body = "";
-      req.on("data", (chunk) => {
-      body += chunk.toString();
-      });
-      req.on("end", () => {
-      try {
-      const data = body ? JSON.parse(body) : undefined;
-      // validate ...
-      const newItem = { id: nextId++, ...data };
-      items.push(newItem);
-      res.writeHead(201, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(newItem));
-      } catch (error) {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Invalid JSON" }));
-      }
-      });
-      return;
-    }
-    // ... PUT, DELETE
-    const itemIndex = items.findIndex((item) => item.id === id);
-    if (itemIndex === -1) {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Item not found" }));
-      return;
-      }
-      // ... read body, validate ...
-    items[itemIndex] = { id, name: data.name.trim(), description: data.description.trim() };
-    // DELETE /items/:id
-    const deletedItem = items.splice(itemIndex, 1)[0];
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "Item deleted", item: deletedItem }));
-    res.writeHead(404, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Not found" }));
-=======
+
   // CORS headers so browser not block request of get post put delete
   const server = http.createServer((req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    
     // Preflight request
     if (req.method === "OPTIONS") {
       res.writeHead(200);
@@ -206,6 +129,7 @@ let nextId = 1;
     const parsedUrl = url.parse(req.url!, true);
     const pathName = parsedUrl.pathname;
     const method = req.method;
+
     //GET /users
     if (method === "GET" && pathName === "/users") {
       const rows = db.prepare("SELECT * FROM users ORDER BY id ASC").all();
@@ -213,6 +137,7 @@ let nextId = 1;
       sendJson(res, 200, users);
       return;
     }
+
     // extract the number id if it has id after /user/(id)
     if (method === "GET" && pathName?.startsWith("/users/")) {
       const id = parseId(pathName.split("/")[2]);
@@ -299,6 +224,7 @@ let nextId = 1;
       });
       return;
     }
+
     // delete, check the id again
     if (method === "DELETE" && pathName?.startsWith("/users/")) {
       const id = parseId(pathName.split("/")[2]);
@@ -319,7 +245,6 @@ let nextId = 1;
     }
 
     sendJson(res, 404, { error: "Not found" });
->>>>>>> 0c1cbd1 (final)
   });
 
   return server;
